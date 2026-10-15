@@ -54,11 +54,18 @@ function GameMap({ area, pos, dots = [], onPick, big, zoom = 16 }) {
   return (
     <div className={'map' + (big ? ' big' : '')}>
       <MapContainer center={[area?.lat ?? pos?.lat ?? 52.23, area?.lng ?? pos?.lng ?? 21.01]} zoom={area ? 16 : pos ? zoom : 6} style={{ height: '100%' }}>
-        <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="© OpenStreetMap" />
+        <TileLayer
+          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          attribution="© OpenStreetMap, © CARTO"
+        />
         <FlyOnce pos={area ? null : pos} zoom={zoom} />
         {onPick && <Picker onPick={onPick} />}
         {area && <Circle center={[area.lat, area.lng]} radius={area.r} pathOptions={{ color: '#39ff14', fillOpacity: 0.05 }} />}
-        {pos && (<Marker position={[pos.lat, pos.lng]} icon={youIcon} zIndexOffset={1000}><Tooltip direction="top" offset={[0, -12]}>Ty</Tooltip></Marker>)}
+        {pos && (
+          <Marker position={[pos.lat, pos.lng]} icon={youIcon} zIndexOffset={1000}>
+            <Tooltip direction="top" offset={[0, -12]}>Ty</Tooltip>
+          </Marker>
+        )}
         {dots.map(d => <CircleMarker key={d.id} center={[d.pos.lat, d.pos.lng]} radius={8} pathOptions={{ color: '#fff', fillColor: d.color, fillOpacity: 1 }}><Tooltip>{d.name}</Tooltip></CircleMarker>)}
       </MapContainer>
     </div>
@@ -88,7 +95,9 @@ function Lobby({ g, pos }) {
   const num = (k, label, step = 1) => <label>{label}<input type="number" min="1" step={step} disabled={!host} value={s[k]} onChange={e => set({ [k]: +e.target.value || 1 })} /></label>;
   return (
     <div className="stack">
-      <p style={{ margin: '8px 0 0' }}>Kod pokoju</p><div className="code">{g.code}</div>
+      <p style={{ margin: '8px 0 0' }}>Kod pokoju</p>
+      <div className="code" onClick={() => navigator.clipboard?.writeText(g.code)}>{g.code}</div>
+      <p style={{ textAlign: 'center', margin: 0, fontSize: '.8rem' }}>Dotknij kodu, żeby skopiować</p>
       <div className="card"><h2>Gracze ({g.players.length})</h2>{g.players.map(p => <div className="pl" key={p.id}><span>{p.name}</span>{p.id === g.hostId && <span>host</span>}</div>)}</div>
       {host ? <>
         <select value={s.variant} onChange={e => set({ variant: e.target.value })}>
@@ -124,6 +133,13 @@ function Game({ g, pos }) {
     ...(g.exposed || []).map(p => ({ id: 'x' + p.id, name: p.name + ' (pojazd!)', pos: p.pos, color: '#ffa500' }))], [g]);
   const catchIt = id => socket.emit('catch', id, r => setMsg(r?.error || 'Złapany!'));
 
+  // komunikat "Złapany!" znika sam po chwili
+  useEffect(() => {
+    if (!msg) return;
+    const t = setTimeout(() => setMsg(''), 2500);
+    return () => clearTimeout(t);
+  }, [msg]);
+
   if (g.phase === 'hiding' && hunter) return <div className="cover"><p>Jesteś łowcą. Zamknij oczy i nie podglądaj.</p><div className="time">{fmt(left)}</div></div>;
   const caught = me?.caught;
   return (
@@ -137,7 +153,8 @@ function Game({ g, pos }) {
       {hunter && g.phase === 'playing' && <div className="card" style={{ marginTop: 10 }}>
         <h2>Złap uciekiniera (w zasięgu {g.catchM} m)</h2>
         {g.players.filter(p => p.role === 'runner' && !p.caught).map(p => <div className="pl" key={p.id}><span className="run">{p.name}</span><button style={{ width: 'auto', padding: '6px 14px' }} onClick={() => catchIt(p.id)}>Złap</button></div>)}
-        {msg && <p>{msg}</p>}</div>}
+      </div>}
+      {msg && <div className="toast">{msg}</div>}
     </div>
   );
 }
@@ -170,6 +187,7 @@ function Ended({ g }) {
     </div>
   );
 }
+
 function Confirm({ d, onClose }) {
   if (!d) return null;
   return (
@@ -189,7 +207,12 @@ function Confirm({ d, onClose }) {
 }
 
 export default function App() {
-  const [g, setG] = useState(null); const [inRoom, setIn] = useState(false); const { pos, err } = useGeo(); const [offline, setOffline] = useState(false);
+  const [g, setG] = useState(null);
+  const [inRoom, setIn] = useState(false);
+  const { pos, err } = useGeo();
+  const [offline, setOffline] = useState(false);
+  const [dialog, setDialog] = useState(null);
+
   useEffect(() => {
     const resume = () => socket.emit('resume', pid, r => r?.ok && setIn(true));
     const up = () => setOffline(false), down = () => setOffline(true);
@@ -198,6 +221,7 @@ export default function App() {
     if (socket.connected) resume();
     return () => { socket.off('closed', closed); socket.off('state', setG); socket.off('connect', resume); socket.off('connect', up); socket.off('connect_error', down); socket.off('disconnect', down); };
   }, []);
+
   // ekran nie gaśnie w trakcie gry
   useEffect(() => {
     if (!inRoom || !navigator.wakeLock) return;
@@ -206,27 +230,27 @@ export default function App() {
     document.addEventListener('visibilitychange', vis);
     return () => { document.removeEventListener('visibilitychange', vis); lock?.release?.(); };
   }, [inRoom]);
-  const [dialog, setDialog] = useState(null);
 
-const leave = () => setDialog({
-  title: 'Wyjść z pokoju?',
-  yes: 'Wyjdź',
-  onYes: () => socket.emit('leave', () => { setIn(false); setG(null); }),
-});
+  const leave = () => setDialog({
+    title: 'Wyjść z pokoju?',
+    yes: 'Wyjdź',
+    onYes: () => socket.emit('leave', () => { setIn(false); setG(null); }),
+  });
 
-const closeRoom = () => setDialog({
-  title: 'Zamknąć pokój?',
-  text: 'Pokój zostanie zamknięty dla wszystkich graczy.',
-  yes: 'Zamknij pokój',
-  danger: true,
-  onYes: () => socket.emit('close', () => { setIn(false); setG(null); }),
-});
-<Confirm d={dialog} onClose={() => setDialog(null)} />
-const showBar = inRoom && g && !(g.phase === 'hiding' && g.players.find(p => p.id === g.me)?.role === 'hunter');
+  const closeRoom = () => setDialog({
+    title: 'Zamknąć pokój?',
+    text: 'Pokój zostanie zamknięty dla wszystkich graczy.',
+    yes: 'Zamknij pokój',
+    danger: true,
+    onYes: () => socket.emit('close', () => { setIn(false); setG(null); }),
+  });
+
+  const showBar = inRoom && g && !(g.phase === 'hiding' && g.players.find(p => p.id === g.me)?.role === 'hunter');
+
   return (
     <div className="app">
       {err && <div className="warn">{err}</div>}
-      {offline && <div className="warn">Brak połączenia z serwerem ({SERVER_URL}). Jeśli to darmowy Render, poczekaj ok. minuty, aż się obudzi.</div>}
+      {offline && <div className="warn info">Brak połączenia z serwerem ({SERVER_URL}). Jeśli to darmowy Render, poczekaj ok. minuty, aż się obudzi.</div>}
       {!inRoom || !g ? <Home onEnter={() => setIn(true)} />
         : g.phase === 'lobby' ? <Lobby g={g} pos={pos} />
         : g.phase === 'ended' ? <Ended g={g} />
@@ -235,6 +259,8 @@ const showBar = inRoom && g && !(g.phase === 'hiding' && g.players.find(p => p.i
         <button className="ghost" onClick={leave}>Wyjdź z pokoju</button>
         {g.hostId === g.me && <button className="ghost" style={{ borderColor: 'var(--hun)', color: 'var(--hun)' }} onClick={closeRoom}>Zamknij pokój</button>}
       </div>}
+
+      <Confirm d={dialog} onClose={() => setDialog(null)} />
     </div>
   );
 }
