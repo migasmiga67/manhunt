@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 import { MapContainer, TileLayer, Circle, CircleMarker, Tooltip, useMap, useMapEvents } from 'react-leaflet';
 
-const socket = io(import.meta.env.VITE_SERVER_URL || 'http://localhost:3001');
+const socket = io(import.meta.env.VITE_SERVER_URL || 'https://twoja-apka.onrender.com');
 
 // Stałe id gracza (per karta przeglądarki) - pozwala wrócić do gry po rozłączeniu
 const pid = (() => {
