@@ -94,9 +94,7 @@ h1,.code,.time{text-shadow:0 0 18px rgba(57,255,20,.45)}
   .warn.ok { background: rgba(57, 255, 20, .1); border-color: var(--run); color: #d8ffd0; }
   .warn.ok::before { content: '✅'; }
 
-  .dark-tiles {
-    filter: invert(1) hue-rotate(180deg) brightness(.95) contrast(.9);
-  }
+ 
   :root {
     --bg: #0b0f0c;
     --panel: #131a15;
