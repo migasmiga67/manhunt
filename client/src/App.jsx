@@ -55,8 +55,9 @@ function GameMap({ area, pos, dots = [], onPick, big, zoom = 16 }) {
     <div className={'map' + (big ? ' big' : '')}>
       <MapContainer center={[area?.lat ?? pos?.lat ?? 52.23, area?.lng ?? pos?.lng ?? 21.01]} zoom={area ? 16 : pos ? zoom : 6} style={{ height: '100%' }}>
         <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-          attribution="© OpenStreetMap, © CARTO"
+          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution="© OpenStreetMap"
+          className="dark-tiles"
         />
         <FlyOnce pos={area ? null : pos} zoom={zoom} />
         {onPick && <Picker onPick={onPick} />}
