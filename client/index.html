@@ -1,35 +1,30 @@
 <!doctype html>
 <html lang="pl">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Manhunt</title>
-  <meta name="theme-color" content="#050805" />
-  <link rel="icon" type="image/png" href="/icon-192.png" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-  <link rel="manifest" href="/manifest.webmanifest" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-title" content="Manhunt" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&display=swap" />
-</head>
-<body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.jsx"></script>
-</body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <filter id="mh-green" color-interpolation-filters="sRGB">
-      <!-- R=0, B=0, G = odwrócona jasność -->
-      <feColorMatrix type="matrix" values="
-        0     0     0     0 0
-        -0.3 -0.59 -0.11  0 1
-        0     0     0     0 0
-        0     0     0     1 0"/>
-      <!-- kontrast: tło do czerni, linie i napisy jaśniejsze -->
-      <feComponentTransfer>
-        <feFuncG type="linear" slope="4" intercept="-0.2"/>
-      </feComponentTransfer>
-    </filter>
-  </svg>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b0f0c" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Manhunt</title>
+    <style>html,body{background:#0b0f0c}</style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <filter id="mh-green" color-interpolation-filters="sRGB">
+        <feColorMatrix type="matrix" values="
+          0     0     0     0 0
+          -0.3 -0.59 -0.11  0 1
+          0     0     0     0 0
+          0     0     0     1 0"/>
+        <feComponentTransfer>
+          <feFuncG type="linear" slope="4" intercept="-0.2"/>
+        </feComponentTransfer>
+      </filter>
+    </svg>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>

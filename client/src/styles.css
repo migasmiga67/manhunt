@@ -11,11 +11,12 @@
   }
   
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html { -webkit-text-size-adjust: 100%; }
+  html { -webkit-text-size-adjust: 100%; background: #0b0f0c; color-scheme: dark; }
   html, body, #root { height: 100%; margin: 0; overscroll-behavior: none; }
   body {
-    background: radial-gradient(1200px 600px at 50% -10%, #12301a 0%, var(--bg) 60%);
-    background-attachment: fixed;
+    background-color: #0b0f0c;
+    background-image: radial-gradient(1200px 600px at 50% -10%, #12301a 0%, #0b0f0c 60%);
+    background-repeat: no-repeat;
     color: var(--text);
     font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.45;
@@ -155,13 +156,13 @@
     height: calc(100dvh - 300px);
     min-height: 320px;
   }
-  .leaflet-container { background: #0e1511; font-family: inherit; touch-action: none; }
+  .leaflet-container { background: #000; font-family: inherit; touch-action: none; }
   .leaflet-tooltip {
     background: var(--panel); color: var(--text);
     border: 1px solid var(--line); box-shadow: none;
   }
   .leaflet-tooltip-top:before { border-top-color: var(--line); }
-  .dark-tiles { filter: invert(1) hue-rotate(180deg) brightness(.95) contrast(.9); }
+  .dark-tiles { filter: url(#mh-green); }
   
   /* Znacznik "Ty" */
   .you-marker { background: none; border: 0; }
