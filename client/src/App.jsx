@@ -2,7 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 import { MapContainer, TileLayer, Circle, CircleMarker, Tooltip, useMap, useMapEvents } from 'react-leaflet';
 
-const socket = io(import.meta.env.VITE_SERVER_URL || 'https://twoja-apka.onrender.com');
+// Adres serwera na Renderze (bez / na końcu); można nadpisać zmienną VITE_SERVER_URL
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'https://manhunt-x5d9.onrender.com';
+const socket = io(SERVER_URL, { transports: ['websocket', 'polling'] });
 
 // Stałe id gracza (per karta przeglądarki) - pozwala wrócić do gry po rozłączeniu
 const pid = (() => {
@@ -140,12 +142,13 @@ function Ended({ g }) {
 }
 
 export default function App() {
-  const [g, setG] = useState(null); const [inRoom, setIn] = useState(false); const { pos, err } = useGeo();
+  const [g, setG] = useState(null); const [inRoom, setIn] = useState(false); const { pos, err } = useGeo(); const [offline, setOffline] = useState(false);
   useEffect(() => {
     const resume = () => socket.emit('resume', pid, r => r?.ok && setIn(true));
-    socket.on('state', setG); socket.on('connect', resume);
+    const up = () => setOffline(false), down = () => setOffline(true);
+    socket.on('state', setG); socket.on('connect', resume); socket.on('connect', up); socket.on('connect_error', down); socket.on('disconnect', down);
     if (socket.connected) resume();
-    return () => { socket.off('state', setG); socket.off('connect', resume); };
+    return () => { socket.off('state', setG); socket.off('connect', resume); socket.off('connect', up); socket.off('connect_error', down); socket.off('disconnect', down); };
   }, []);
   // ekran nie gaśnie w trakcie gry
   useEffect(() => {
@@ -158,6 +161,7 @@ export default function App() {
   return (
     <div className="app">
       {err && <div className="warn">{err}</div>}
+      {offline && <div className="warn">Brak połączenia z serwerem ({SERVER_URL}). Jeśli to darmowy Render, poczekaj ok. minuty, aż się obudzi.</div>}
       {!inRoom || !g ? <Home onEnter={() => setIn(true)} />
         : g.phase === 'lobby' ? <Lobby g={g} pos={pos} />
         : g.phase === 'ended' ? <Ended g={g} />
