@@ -9,7 +9,7 @@
     --hun: #ff4d4d;
     --radius: 14px;
   }
-  
+  @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap');
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { -webkit-text-size-adjust: 100%; background: #0b0f0c; color-scheme: dark; }
   html, body, #root { height: 100%; margin: 0; overscroll-behavior: none; }
