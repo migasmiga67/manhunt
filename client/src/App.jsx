@@ -170,6 +170,23 @@ function Ended({ g }) {
     </div>
   );
 }
+function Confirm({ d, onClose }) {
+  if (!d) return null;
+  return (
+    <div className="modal-bg" onClick={onClose}>
+      <div className="modal" role="alertdialog" aria-modal="true" onClick={e => e.stopPropagation()}>
+        <h3>{d.title}</h3>
+        {d.text && <p>{d.text}</p>}
+        <div className="row">
+          <button className="ghost" onClick={onClose}>Anuluj</button>
+          <button className={d.danger ? 'danger' : ''} onClick={() => { d.onYes(); onClose(); }}>
+            {d.yes || 'OK'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
   const [g, setG] = useState(null); const [inRoom, setIn] = useState(false); const { pos, err } = useGeo(); const [offline, setOffline] = useState(false);
@@ -189,9 +206,23 @@ export default function App() {
     document.addEventListener('visibilitychange', vis);
     return () => { document.removeEventListener('visibilitychange', vis); lock?.release?.(); };
   }, [inRoom]);
-  const leave = () => { if (confirm('Wyjść z pokoju?')) socket.emit('leave', () => { setIn(false); setG(null); }); };
-  const closeRoom = () => { if (confirm('Zamknąć pokój dla wszystkich graczy?')) socket.emit('close', () => { setIn(false); setG(null); }); };
-  const showBar = inRoom && g && !(g.phase === 'hiding' && g.players.find(p => p.id === g.me)?.role === 'hunter');
+  const [dialog, setDialog] = useState(null);
+
+const leave = () => setDialog({
+  title: 'Wyjść z pokoju?',
+  yes: 'Wyjdź',
+  onYes: () => socket.emit('leave', () => { setIn(false); setG(null); }),
+});
+
+const closeRoom = () => setDialog({
+  title: 'Zamknąć pokój?',
+  text: 'Pokój zostanie zamknięty dla wszystkich graczy.',
+  yes: 'Zamknij pokój',
+  danger: true,
+  onYes: () => socket.emit('close', () => { setIn(false); setG(null); }),
+});
+<Confirm d={dialog} onClose={() => setDialog(null)} />
+const showBar = inRoom && g && !(g.phase === 'hiding' && g.players.find(p => p.id === g.me)?.role === 'hunter');
   return (
     <div className="app">
       {err && <div className="warn">{err}</div>}
