@@ -1,6 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
-import { MapContainer, TileLayer, Circle, CircleMarker, Tooltip, useMap, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import { MapContainer, TileLayer, Circle, CircleMarker, Marker, Tooltip, useMap, useMapEvents } from 'react-leaflet';
+
+const youIcon = L.divIcon({
+  className: 'you-marker',
+  html: '<span class="you-pulse"></span><span class="you-dot"></span>',
+  iconSize: [26, 26],
+  iconAnchor: [13, 13],
+});
 
 // Adres serwera na Renderze (bez / na końcu); można nadpisać zmienną VITE_SERVER_URL
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'https://manhunt-x5d9.onrender.com';
@@ -50,7 +58,7 @@ function GameMap({ area, pos, dots = [], onPick, big, zoom = 16 }) {
         <FlyOnce pos={area ? null : pos} zoom={zoom} />
         {onPick && <Picker onPick={onPick} />}
         {area && <Circle center={[area.lat, area.lng]} radius={area.r} pathOptions={{ color: '#39ff14', fillOpacity: 0.05 }} />}
-        {pos && <CircleMarker center={[pos.lat, pos.lng]} radius={9} pathOptions={{ color: '#fff', fillColor: '#d8ffd8', fillOpacity: 1 }}><Tooltip>Ty</Tooltip></CircleMarker>}
+        {pos && (<Marker position={[pos.lat, pos.lng]} icon={youIcon} zIndexOffset={1000}><Tooltip direction="top" offset={[0, -12]}>Ty</Tooltip></Marker>)}
         {dots.map(d => <CircleMarker key={d.id} center={[d.pos.lat, d.pos.lng]} radius={8} pathOptions={{ color: '#fff', fillColor: d.color, fillOpacity: 1 }}><Tooltip>{d.name}</Tooltip></CircleMarker>)}
       </MapContainer>
     </div>
@@ -135,10 +143,32 @@ function Game({ g, pos }) {
 }
 
 function Ended({ g }) {
-  const host = g.hostId === g.me; const win = g.winner === 'hunters';
-  return <div className="stack"><h1 className={win ? 'hun' : 'run'}>{win ? 'Wygrali łowcy' : 'Wygrali uciekinierzy'}</h1>
-    <div className="card">{g.players.map(p => <div className="pl" key={p.id}><span>{p.name}</span><span className={p.role === 'hunter' ? 'hun' : 'run'}>{p.role === 'hunter' ? 'łowca' : p.caught ? 'złapany' : 'uciekinier'}</span></div>)}</div>
-    {host ? <button onClick={() => socket.emit('again')}>Zagraj jeszcze raz</button> : <p>Host może zacząć nową rundę.</p>}</div>;
+  const host = g.hostId === g.me;
+  const win = g.winner === 'hunters';
+  const me = g.players.find(p => p.id === g.me);
+  const iWon = win ? me?.role === 'hunter' : me?.role === 'runner' && !me?.caught;
+  return (
+    <div className="stack">
+      <div className={'banner ' + (win ? 'hun' : 'run')}>
+        <div className="banner-emoji">{win ? '🎯' : '🏃'}</div>
+        <div className="banner-title">{win ? 'Wygrali łowcy' : 'Wygrali uciekinierzy'}</div>
+        <div className="banner-sub">{iWon ? 'Twoja drużyna wygrała!' : 'Tym razem się nie udało.'}</div>
+      </div>
+      <div className="card">
+        <h2>Podsumowanie</h2>
+        {g.players.map(p => (
+          <div className="pl" key={p.id}>
+            <span>{p.name}</span>
+            <span className={p.role === 'hunter' ? 'hun' : 'run'}>
+              {p.role === 'hunter' ? 'łowca' : p.caught ? 'złapany' : 'uciekinier'}
+            </span>
+          </div>
+        ))}
+      </div>
+      {host ? <button onClick={() => socket.emit('again')}>Zagraj jeszcze raz</button>
+            : <p style={{ textAlign: 'center' }}>Host może zacząć nową rundę.</p>}
+    </div>
+  );
 }
 
 export default function App() {

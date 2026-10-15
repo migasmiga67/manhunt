@@ -26,3 +26,30 @@ h1,.code,.time{text-shadow:0 0 18px rgba(57,255,20,.45)}
 .card,.map{border:1px solid var(--ln)}
 .leaflet-tile-pane{filter:invert(1) grayscale(1) brightness(.75) sepia(1) hue-rotate(65deg) saturate(3)}
 .leaflet-container{background:#050805}
+.you-marker { background: none; border: 0; }
+.you-dot {
+  position: absolute; inset: 5px; border-radius: 50%;
+  background: #fff; border: 3px solid #39ff14;
+  box-shadow: 0 0 10px #39ff14;
+}
+.you-pulse {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: rgba(57, 255, 20, .55);
+  animation: you-pulse 1.8s ease-out infinite;
+}
+@keyframes you-pulse {
+  0%   { transform: scale(.6); opacity: .9; }
+  100% { transform: scale(3.2); opacity: 0; }
+}
+.banner {
+    text-align: center; padding: 36px 16px;
+    border-radius: 20px; border: 2px solid currentColor;
+    background: radial-gradient(circle at 50% 0%, rgba(255,255,255,.08), transparent 70%), var(--panel);
+    animation: banner-in .5s cubic-bezier(.2, 1.4, .4, 1);
+  }
+  .banner.run { box-shadow: 0 0 40px rgba(57,255,20,.25); }
+  .banner.hun { box-shadow: 0 0 40px rgba(255,77,77,.25); }
+  .banner-emoji { font-size: 3.5rem; }
+  .banner-title { font-size: 2.2rem; font-weight: 900; line-height: 1.1; margin-top: 6px; }
+  .banner-sub { color: var(--text); opacity: .8; margin-top: 8px; }
+  @keyframes banner-in { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
