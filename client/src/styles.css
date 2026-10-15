@@ -94,13 +94,8 @@ h1,.code,.time{text-shadow:0 0 18px rgba(57,255,20,.45)}
   .warn.ok { background: rgba(57, 255, 20, .1); border-color: var(--run); color: #d8ffd0; }
   .warn.ok::before { content: '✅'; }
 
+  .dark-tiles { filter: url(#mh-green); }
   .leaflet-container { background: #000; }
-
-  /* czarna mapa z zielonymi elementami */
-  .dark-tiles {
-    filter: grayscale(1) invert(1) brightness(.9) contrast(1.4)
-            sepia(1) hue-rotate(70deg) saturate(2.2) !important;
-  }
   :root {
     --bg: #0b0f0c;
     --panel: #131a15;

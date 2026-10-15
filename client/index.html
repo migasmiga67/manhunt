@@ -18,4 +18,18 @@
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
 </body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <filter id="mh-green" color-interpolation-filters="sRGB">
+      <!-- R=0, B=0, G = odwrócona jasność -->
+      <feColorMatrix type="matrix" values="
+        0     0     0     0 0
+        -0.3 -0.59 -0.11  0 1
+        0     0     0     0 0
+        0     0     0     1 0"/>
+      <!-- kontrast: tło do czerni, linie i napisy jaśniejsze -->
+      <feComponentTransfer>
+        <feFuncG type="linear" slope="4" intercept="-0.2"/>
+      </feComponentTransfer>
+    </filter>
+  </svg>
 </html>
