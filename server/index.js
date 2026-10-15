@@ -137,6 +137,20 @@ io.on('connection', s => {
     const r = room();
     if (isHost(r)) { r.phase = 'lobby'; Object.values(r.players).forEach(p => { p.role = null; p.caught = false; p.exposedUntil = 0; p.hist = []; }); push(r); }
   });
+  // wyjście z pokoju (każdy gracz)
+  s.on('leave', cb => {
+    const r = room(), p = me();
+    if (r && p) removePlayer(r, p.id);
+    s.data.code = null;
+    cb?.({ ok: true });
+  });
+  // zamknięcie pokoju dla wszystkich (tylko host)
+  s.on('close', cb => {
+    const r = room(); if (!isHost(r)) return cb?.({ error: 'Tylko host może zamknąć pokój' });
+    Object.values(r.players).forEach(p => { clearTimeout(p.timer); p.sid && io.to(p.sid).emit('closed'); });
+    delete rooms[r.code];
+    cb?.({ ok: true });
+  });
   s.on('disconnect', () => {
     const r = room(), p = me(); if (!r || !p || p.sid !== s.id) return;
     p.sid = null;

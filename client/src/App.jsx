@@ -146,9 +146,10 @@ export default function App() {
   useEffect(() => {
     const resume = () => socket.emit('resume', pid, r => r?.ok && setIn(true));
     const up = () => setOffline(false), down = () => setOffline(true);
-    socket.on('state', setG); socket.on('connect', resume); socket.on('connect', up); socket.on('connect_error', down); socket.on('disconnect', down);
+    const closed = () => { setIn(false); setG(null); };
+    socket.on('closed', closed); socket.on('state', setG); socket.on('connect', resume); socket.on('connect', up); socket.on('connect_error', down); socket.on('disconnect', down);
     if (socket.connected) resume();
-    return () => { socket.off('state', setG); socket.off('connect', resume); socket.off('connect', up); socket.off('connect_error', down); socket.off('disconnect', down); };
+    return () => { socket.off('closed', closed); socket.off('state', setG); socket.off('connect', resume); socket.off('connect', up); socket.off('connect_error', down); socket.off('disconnect', down); };
   }, []);
   // ekran nie gaśnie w trakcie gry
   useEffect(() => {
@@ -158,6 +159,9 @@ export default function App() {
     document.addEventListener('visibilitychange', vis);
     return () => { document.removeEventListener('visibilitychange', vis); lock?.release?.(); };
   }, [inRoom]);
+  const leave = () => { if (confirm('Wyjść z pokoju?')) socket.emit('leave', () => { setIn(false); setG(null); }); };
+  const closeRoom = () => { if (confirm('Zamknąć pokój dla wszystkich graczy?')) socket.emit('close', () => { setIn(false); setG(null); }); };
+  const showBar = inRoom && g && !(g.phase === 'hiding' && g.players.find(p => p.id === g.me)?.role === 'hunter');
   return (
     <div className="app">
       {err && <div className="warn">{err}</div>}
@@ -166,6 +170,10 @@ export default function App() {
         : g.phase === 'lobby' ? <Lobby g={g} pos={pos} />
         : g.phase === 'ended' ? <Ended g={g} />
         : <Game g={g} pos={pos} />}
+      {showBar && <div className="row" style={{ marginTop: 16 }}>
+        <button className="ghost" onClick={leave}>Wyjdź z pokoju</button>
+        {g.hostId === g.me && <button className="ghost" style={{ borderColor: 'var(--hun)', color: 'var(--hun)' }} onClick={closeRoom}>Zamknij pokój</button>}
+      </div>}
     </div>
   );
 }
