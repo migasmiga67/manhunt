@@ -112,6 +112,17 @@ h1,.code,.time{text-shadow:0 0 18px rgba(57,255,20,.45)}
     --hun: #ff4d4d;
     --radius: 14px;
   }
+  html {
+    background: #0b0f0c;
+    color-scheme: dark;
+  }
+  body {
+    background-color: #0b0f0c;
+    background-image: radial-gradient(1200px 600px at 50% -10%, #12301a 0%, #0b0f0c 60%);
+    background-repeat: no-repeat;
+    background-attachment: scroll; /* "fixed" bywa bugiem na iOS */
+    min-height: 100%;
+  }
   
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { -webkit-text-size-adjust: 100%; }
