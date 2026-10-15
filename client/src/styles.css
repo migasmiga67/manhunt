@@ -217,7 +217,6 @@ h1,.code,.time{text-shadow:0 0 18px rgba(57,255,20,.45)}
     letter-spacing: .35em; padding: 14px 0 14px .35em;
     color: var(--run);
     background: var(--panel);
-    border: 1px dashed var(--run);
     border-radius: var(--radius);
     text-shadow: 0 0 18px rgba(57, 255, 20, .4);
     cursor: pointer;
