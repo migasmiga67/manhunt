@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 import L from 'leaflet';
 import { MapContainer, TileLayer, Circle, CircleMarker, Marker, Tooltip, useMap, useMapEvents } from 'react-leaflet';
-import "./styles.css"
+
 const youIcon = L.divIcon({
   className: 'you-marker',
   html: '<span class="you-pulse"></span><span class="you-dot"></span>',
